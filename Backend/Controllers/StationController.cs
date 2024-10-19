@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CheapTrip.Backend.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("Stations")]
 public class StationController(HttpClient http) : ControllerBase
 {
     [HttpGet]

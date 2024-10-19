@@ -1,7 +1,90 @@
 ﻿@page "/tripplanner"
+@using CheapTrip.Contracts
+@inject StationService StationService;
+
 <PageTitle>Trip planner</PageTitle>
 
 <h1>Trip Planner</h1>
-@code {
 
+<div class="w-custom">
+    <div class="mb-3">
+        <input type="text" class="form-control" value="@trip.Origin?.Name" @oninput="@((ChangeEventArgs e) => GetStationSuggestions(e, 1))" />
+        @if (suggestionFor == 1 && stationSuggestions.Any())
+        {
+            <div class="list-group">
+                @foreach (var station in stationSuggestions)
+                {
+                    <a href="javascript: void(0);" class="list-group-item list-group-item-action" @onclick="@(() => SelectStation(station, 1))">@station.Name</a>
+                }
+            </div>
+        }
+    </div>
+    <div class="mb-3">
+        <input type="text" class="form-control" value="@trip.Destination?.Name" @oninput="@((ChangeEventArgs e) => GetStationSuggestions(e, 2))" />
+        @if (suggestionFor == 2 && stationSuggestions.Any())
+        {
+            <div class="list-group">
+                @foreach (var station in stationSuggestions)
+                {
+                    <a href="javascript: void(0);" class="list-group-item list-group-item-action" @onclick="@(() => SelectStation(station, 2))">@station.Name</a>
+                }
+            </div>
+        }
+    </div>
+    <div class="mb-3">
+        <button type="button" class="btn btn-primary" @onclick=StartSearch>Suchen</button>
+    </div>
+</div>
+
+
+@code {
+    private int suggestionFor = 0;
+    private List<Station> stationSuggestions = [];
+    private Timer? _debounceTimer;
+
+    private Trip trip = new Trip
+        {
+            Departure = DateTime.Now
+        };
+
+    private void GetStationSuggestions(ChangeEventArgs e, int stationInputId)
+    {
+        if (e.Value is null) return;
+
+        suggestionFor = stationInputId;
+
+        var input = e.Value.ToString()!;
+
+        _debounceTimer?.Dispose();
+        _debounceTimer = new Timer(async _ =>
+        {
+            stationSuggestions = await StationService.GetStationSuggestions(input);
+            await InvokeAsync(StateHasChanged);
+        }, null, 500, Timeout.Infinite);
+    }
+
+    private void SelectStation(Station station, int stationInputId)
+    {
+        if (stationInputId == 1)
+        {
+            trip.Origin = station;
+        }
+        else
+        {
+            trip.Destination = station;
+        }
+
+        stationSuggestions = [];
+        suggestionFor = 0;
+    }
+
+    private void StartSearch()
+    {
+        Console.WriteLine($"Reise von {trip.Origin.Name} to {trip.Destination.Name} at {trip.Departure}");
+    }
+
+    public void Dispose()
+    {
+        _debounceTimer?.Dispose();
+    }
 }

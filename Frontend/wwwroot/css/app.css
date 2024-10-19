@@ -4,12 +4,18 @@
 }
 
 body {
-    background-color: #212121 !important;
+    /*background-color: #212121 !important;*/
     height: 100vh;
 }
 
 .bg-sidebar {
-    background-color: #171717;
+    /*background-color: #171717;*/
+    background-color: #F5F5F5;
+}
+
+.w-custom {
+    max-width: 25%;
+    min-width: 30ch;
 }
 
 .loading-container {
